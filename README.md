@@ -2,6 +2,8 @@
 ![PHP](https://img.shields.io/badge/PHP-8.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+# RIZQY - 2409116039 - A'2024
+
 # 📡 Memahami API dan Implementasinya di Laravel
 
 ---
