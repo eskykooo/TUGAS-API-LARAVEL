@@ -7,6 +7,7 @@
     <meta name="description" content="@yield('meta_description', 'Blog CMS - Portal Berita & Blog')">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.min.css">
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
         tailwind.config = {
@@ -20,6 +21,7 @@
             }
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -52,6 +54,41 @@
         .article-content img { border-radius: 0.75rem; margin: 1.5rem auto; max-width: 100%; height: auto; }
         .article-content a { color: #0ea5e9; text-decoration: underline; text-underline-offset: 2px; }
         .article-content a:hover { color: #0284c7; }
+
+        trix-toolbar .trix-button-group { border-color: #e2e8f0; }
+        trix-toolbar .trix-button { border-bottom: none; }
+        trix-toolbar .trix-button.trix-active { background: #e0f2fe; color: #0ea5e9; }
+        trix-editor {
+            min-height: 320px;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-size: 1rem;
+            line-height: 1.8;
+            outline: none;
+            background: #f8fafc;
+            color: #1e293b;
+            caret-color: #0ea5e9;
+        }
+        .dark trix-editor {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        trix-editor:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+        trix-toolbar { margin-bottom: 0.75rem; }
+        trix-toolbar .trix-button-row { gap: 0.25rem; flex-wrap: wrap; }
+        trix-toolbar .trix-button { border-radius: 0.5rem; height: 2rem; }
+        trix-toolbar .trix-button-group:not(:first-child) { margin-left: 0.5rem; }
+        @media (prefers-color-scheme: dark) {
+            trix-toolbar .trix-button { color: #94a3b8; }
+            trix-toolbar .trix-button-group { border-color: #334155; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-300 flex flex-col min-h-screen">
@@ -165,7 +202,11 @@
                         @isset($footerArticles)
                             @foreach($footerArticles as $fa)
                             <a href="/articles/{{ $fa->slug }}" class="flex gap-3 group">
-                                <img src="https://picsum.photos/seed/{{ $fa->slug }}/80/60" alt="{{ $fa->title }}" class="w-16 h-12 rounded-lg object-cover flex-shrink-0" loading="lazy">
+                                @if($fa->thumbnail_url)
+                                <img src="{{ $fa->thumbnail_url }}" alt="{{ $fa->title }}" class="w-16 h-12 rounded-lg object-cover flex-shrink-0" loading="lazy">
+                                @else
+                                <div class="w-16 h-12 rounded-lg flex-shrink-0 bg-gradient-to-br from-sky-500/20 to-indigo-600/20 flex items-center justify-center"><i class="fas fa-newspaper text-slate-400 text-lg"></i></div>
+                                @endif
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm text-slate-300 group-hover:text-sky-400 transition-colors line-clamp-2 leading-snug">{{ $fa->title }}</p>
                                     <p class="text-xs text-slate-500 mt-1.5">{{ $fa->published_at?->diffForHumans() }}</p>

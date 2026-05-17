@@ -18,7 +18,7 @@ class StoreArticleRequest extends FormRequest
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'excerpt' => 'nullable|string',
-            'thumbnail' => 'nullable|string',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'status' => 'nullable|in:draft,published,archived',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',

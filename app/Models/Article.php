@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class Article extends Model
 {
@@ -56,6 +56,16 @@ class Article extends Model
     {
         $words = str_word_count(strip_tags($this->content));
         $minutes = ceil($words / 200);
-        return $minutes . ' menit';
+
+        return $minutes.' menit';
+    }
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if (! $this->thumbnail) {
+            return null;
+        }
+
+        return Storage::url($this->thumbnail);
     }
 }

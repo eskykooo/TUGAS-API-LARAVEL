@@ -8,6 +8,7 @@ use App\Http\Traits\ApiResponseTrait;
 use App\Models\Article;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
@@ -21,22 +22,22 @@ class ArticleController extends Controller
             ->where('status', 'published');
 
         if ($request->filled('category')) {
-            $query->whereHas('category', fn($q) => $q->where('slug', $request->category));
+            $query->whereHas('category', fn ($q) => $q->where('slug', $request->category));
         }
 
         if ($request->filled('tag')) {
-            $query->whereHas('tags', fn($q) => $q->where('slug', $request->tag));
+            $query->whereHas('tags', fn ($q) => $q->where('slug', $request->tag));
         }
 
         if ($request->filled('author')) {
-            $query->whereHas('user', fn($q) => $q->where('name', 'like', "%{$request->author}%"));
+            $query->whereHas('user', fn ($q) => $q->where('name', 'like', "%{$request->author}%"));
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%");
+                    ->orWhere('content', 'like', "%{$search}%");
             });
         }
 
@@ -69,11 +70,15 @@ class ArticleController extends Controller
     public function store(StoreArticleRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $data['slug'] = Str::slug($data['title']) . '-' . Str::random(5);
+        $data['slug'] = Str::slug($data['title']).'-'.Str::random(5);
         $data['user_id'] = $request->user()->id;
 
         if ($data['status'] === 'published') {
             $data['published_at'] = now();
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
         }
 
         $article = Article::create($data);
@@ -91,7 +96,7 @@ class ArticleController extends Controller
     {
         $article = Article::findOrFail($id);
 
-        if ($article->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+        if ($article->user_id !== $request->user()->id && ! $request->user()->isAdmin()) {
             return $this->error('Anda tidak memiliki akses', 403);
         }
 
@@ -99,6 +104,13 @@ class ArticleController extends Controller
 
         if ($data['status'] === 'published' && $article->status !== 'published') {
             $data['published_at'] = now();
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            if ($article->thumbnail) {
+                Storage::disk('public')->delete($article->thumbnail);
+            }
+            $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
         }
 
         $article->update($data);
@@ -116,8 +128,12 @@ class ArticleController extends Controller
     {
         $article = Article::findOrFail($id);
 
-        if ($article->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+        if ($article->user_id !== $request->user()->id && ! $request->user()->isAdmin()) {
             return $this->error('Anda tidak memiliki akses', 403);
+        }
+
+        if ($article->thumbnail) {
+            Storage::disk('public')->delete($article->thumbnail);
         }
 
         $article->delete();
@@ -129,7 +145,7 @@ class ArticleController extends Controller
     {
         $article = Article::findOrFail($id);
 
-        if ($article->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+        if ($article->user_id !== $request->user()->id && ! $request->user()->isAdmin()) {
             return $this->error('Anda tidak memiliki akses', 403);
         }
 

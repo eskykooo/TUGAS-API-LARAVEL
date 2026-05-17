@@ -26,7 +26,8 @@
 
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Konten</label>
-                    <textarea name="content" rows="15" x-model="content" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition font-mono text-sm @error('content') border-red-500 @enderror" placeholder="Tulis konten artikel di sini..." required>{{ old('content') }}</textarea>
+                    <textarea name="content" id="content" class="hidden">{{ old('content') }}</textarea>
+                    <trix-editor input="content" @trix-change="content = document.getElementById('content').value" @trix-initialize="content = document.getElementById('content').value" class="trix-content"></trix-editor>
                     @error('content')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
                 </div>
 
@@ -105,7 +106,7 @@
                 <h3 class="font-bold text-slate-800 dark:text-white mb-2">Preview</h3>
                 <h2 class="text-2xl font-bold text-slate-800 dark:text-white" x-html="title || 'Judul Artikel'"></h2>
                 <hr class="my-4 border-slate-200 dark:border-slate-700">
-                <div class="text-slate-800 dark:text-slate-200 whitespace-pre-wrap" x-html="content || 'Konten artikel akan tampil di sini...'"></div>
+                <div class="text-slate-800 dark:text-slate-200" x-html="content || 'Konten artikel akan tampil di sini...'"></div>
             </div>
         </form>
     </div>

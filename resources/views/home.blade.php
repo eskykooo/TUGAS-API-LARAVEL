@@ -6,7 +6,11 @@
 
 {{-- HERO --}}
 <section class="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-end overflow-hidden">
-    <img src="https://picsum.photos/seed/hero-main/1600/900" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
+    @if($featured && $featured->thumbnail_url)
+    <img src="{{ $featured->thumbnail_url }}" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
+    @else
+    <div class="absolute inset-0 bg-gradient-to-br from-sky-600 to-indigo-800"></div>
+    @endif
     <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent"></div>
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 sm:pb-16 lg:pb-20 w-full">
         @if($featured)
@@ -66,7 +70,11 @@
         @endphp
         <article data-aos="fade-up" data-aos-delay="{{ $index * 80 }}" class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group flex flex-col">
             <div class="overflow-hidden h-48 flex-shrink-0">
-                <img src="https://picsum.photos/seed/{{ $article->slug }}/800/450" alt="{{ $article->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                @if($article->thumbnail_url)
+                <img src="{{ $article->thumbnail_url }}" alt="{{ $article->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                @else
+                <div class="w-full h-full bg-gradient-to-br from-sky-500/30 to-indigo-600/30 flex items-center justify-center"><i class="fas fa-newspaper text-4xl text-slate-300 dark:text-slate-600"></i></div>
+                @endif
             </div>
             <div class="p-5 flex flex-col flex-1">
                 <span class="inline-block self-start px-2.5 py-1 {{ $color }} text-xs font-semibold rounded-lg mb-3">{{ $article->category->name ?? 'Umum' }}</span>
@@ -128,7 +136,11 @@
                 @foreach($popular as $i => $article)
                 <a href="/articles/{{ $article->slug }}" class="flex gap-3 sm:gap-4 bg-white dark:bg-slate-800 rounded-2xl p-3 sm:p-4 hover:shadow-md transition-all group border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
                     <span class="text-2xl sm:text-3xl font-black text-slate-200 dark:text-slate-700 w-8 sm:w-10 flex-shrink-0 leading-none self-center">{{ str_pad($i+1, 2, '0', STR_PAD_LEFT) }}</span>
-                    <img src="https://picsum.photos/seed/{{ $article->slug }}/120/90" alt="" class="w-16 h-14 sm:w-20 sm:h-16 object-cover rounded-xl flex-shrink-0 self-center" loading="lazy">
+                    @if($article->thumbnail_url)
+                    <img src="{{ $article->thumbnail_url }}" alt="" class="w-16 h-14 sm:w-20 sm:h-16 object-cover rounded-xl flex-shrink-0 self-center" loading="lazy">
+                    @else
+                    <div class="w-16 h-14 sm:w-20 sm:h-16 rounded-xl flex-shrink-0 self-center bg-gradient-to-br from-sky-500/30 to-indigo-600/30 flex items-center justify-center"><i class="fas fa-newspaper text-slate-400 text-lg"></i></div>
+                    @endif
                     <div class="flex-1 min-w-0">
                         <span class="text-xs text-sky-500 font-semibold">{{ $article->category->name ?? '' }}</span>
                         <h3 class="font-bold text-slate-800 dark:text-white text-sm line-clamp-2 group-hover:text-sky-500 transition-colors mt-0.5">{{ $article->title }}</h3>

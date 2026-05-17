@@ -34,6 +34,7 @@ class DashboardController extends Controller
     {
         $categories = \App\Models\Category::all();
         $tags = \App\Models\Tag::all();
+
         return view('dashboard.articles.create', compact('categories', 'tags'));
     }
 
@@ -50,7 +51,7 @@ class DashboardController extends Controller
             'status' => 'required|in:draft,published',
         ]);
 
-        $data['slug'] = Str::slug($data['title']) . '-' . Str::random(5);
+        $data['slug'] = Str::slug($data['title']).'-'.Str::random(5);
         $data['user_id'] = auth()->id();
 
         if ($data['status'] === 'published') {
@@ -70,6 +71,7 @@ class DashboardController extends Controller
         $msg = $data['status'] === 'published'
             ? 'Artikel berhasil diterbitkan!'
             : 'Artikel berhasil disimpan sebagai draft.';
+
         return redirect('/dashboard')->with('success', $msg);
     }
 
@@ -78,6 +80,7 @@ class DashboardController extends Controller
         $article = Article::where('user_id', auth()->id())->findOrFail($id);
         $categories = \App\Models\Category::all();
         $tags = \App\Models\Tag::all();
+
         return view('dashboard.articles.edit', compact('article', 'categories', 'tags'));
     }
 
@@ -136,6 +139,7 @@ class DashboardController extends Controller
             'status' => 'published',
             'published_at' => now(),
         ]);
+
         return back()->with('success', 'Artikel berhasil diterbitkan!');
     }
 

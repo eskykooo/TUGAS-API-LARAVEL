@@ -12,10 +12,16 @@ $color = $catColors[$slug] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dar
 
 <article class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group flex flex-col border border-slate-100 dark:border-slate-700">
     <div class="overflow-hidden h-48 relative flex-shrink-0">
-        <img src="https://picsum.photos/seed/{{ $article->slug }}/800/450"
+        @if($article->thumbnail_url)
+        <img src="{{ $article->thumbnail_url }}"
              alt="{{ $article->title }}"
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
              loading="lazy">
+        @else
+        <div class="w-full h-full bg-gradient-to-br from-sky-500/30 to-indigo-600/30 flex items-center justify-center">
+            <i class="fas fa-newspaper text-4xl text-slate-300 dark:text-slate-600"></i>
+        </div>
+        @endif
         <span class="absolute top-3 left-3 px-2.5 py-1 {{ $color }} text-xs font-semibold rounded-lg backdrop-blur-sm">
             {{ $article->category->name ?? 'Umum' }}
         </span>

@@ -18,10 +18,18 @@
 
 {{-- Hero Image --}}
 <div class="relative w-full h-72 md:h-96 lg:h-[480px] overflow-hidden">
-    <img src="https://picsum.photos/seed/{{ $article->slug }}/1600/900"
+    @if($article->thumbnail_url)
+    <img src="{{ $article->thumbnail_url }}"
          alt="{{ $article->title }}"
          class="absolute inset-0 w-full h-full object-cover object-center">
     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+    @else
+    <div class="absolute inset-0 bg-gradient-to-br from-sky-600 to-indigo-800"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+        <i class="fas fa-newspaper text-6xl text-white/20"></i>
+    </div>
+    @endif
     <div class="absolute bottom-0 left-0 right-0 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-10">
         <span class="inline-block px-3 py-1 bg-sky-500 text-white text-xs font-bold rounded-full mb-3 uppercase tracking-wider">{{ $article->category->name }}</span>
         <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight max-w-4xl mt-2">{{ $article->title }}</h1>
