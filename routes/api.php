@@ -7,21 +7,21 @@ use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\TagController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:10,60');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:20,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
 
-    Route::post('/articles', [ArticleController::class, 'store']);
-    Route::put('/articles/{id}', [ArticleController::class, 'update']);
-    Route::delete('/articles/{id}', [ArticleController::class, 'destroy']);
-    Route::post('/articles/{id}/publish', [ArticleController::class, 'publish']);
+    Route::post('/articles', [ArticleController::class, 'store'])->middleware('throttle:10,60');
+    Route::put('/articles/{id}', [ArticleController::class, 'update'])->middleware('throttle:10,60');
+    Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->middleware('throttle:10,60');
+    Route::post('/articles/{id}/publish', [ArticleController::class, 'publish'])->middleware('throttle:10,60');
 
-    Route::post('/comments', [CommentController::class, 'store']);
-    Route::put('/comments/{id}', [CommentController::class, 'update']);
-    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+    Route::post('/comments', [CommentController::class, 'store'])->middleware('throttle:5,1');
+    Route::put('/comments/{id}', [CommentController::class, 'update'])->middleware('throttle:5,1');
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('throttle:10,1');
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {

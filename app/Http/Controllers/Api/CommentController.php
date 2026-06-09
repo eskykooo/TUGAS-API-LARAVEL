@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Traits\ApiResponseTrait;
-use App\Models\Article;
 use App\Models\Comment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,7 +26,23 @@ class CommentController extends Controller
 
     public function store(StoreCommentRequest $request): JsonResponse
     {
+        if ($request->filled('website')) {
+            return $this->error('Bad request', 400);
+        }
+
         $data = $request->validated();
+        $data['content'] = strip_tags($data['content']);
+
+        $duplicate = Comment::where('user_id', $request->user()->id)
+            ->where('content', $data['content'])
+            ->where('article_id', $data['article_id'])
+            ->where('created_at', '>', now()->subMinutes(5))
+            ->exists();
+
+        if ($duplicate) {
+            return $this->error('Komentar duplikat terdeteksi.', 429);
+        }
+
         $data['user_id'] = $request->user()->id;
         $data['status'] = 'pending';
 
@@ -45,10 +60,10 @@ class CommentController extends Controller
             return $this->error('Anda tidak memiliki akses', 403);
         }
 
-        $request->validate(['content' => 'required|string|min:3']);
+        $request->validate(['content' => 'required|string|min:3|max:2000']);
 
         $comment->update([
-            'content' => $request->content,
+            'content' => strip_tags($request->content),
             'status' => 'pending',
         ]);
 
@@ -59,7 +74,7 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($id);
 
-        if ($comment->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+        if ($comment->user_id !== $request->user()->id && ! $request->user()->isAdmin()) {
             return $this->error('Anda tidak memiliki akses', 403);
         }
 
@@ -78,8 +93,18 @@ class CommentController extends Controller
 
     public function adminIndex(): JsonResponse
     {
-        $comments = Comment::with(['article', 'user'])->latest()->get();
+        $comments = Comment::with(['article', 'user'])->latest()->paginate(20);
 
-        return $this->success($comments, 'Semua komentar berhasil diambil');
+        return $this->success(
+            $comments->items(),
+            'Semua komentar berhasil diambil',
+            200,
+            [
+                'current_page' => $comments->currentPage(),
+                'total' => $comments->total(),
+                'per_page' => $comments->perPage(),
+                'last_page' => $comments->lastPage(),
+            ]
+        );
     }
 }

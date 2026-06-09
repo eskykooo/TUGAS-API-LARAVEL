@@ -10,7 +10,11 @@ class TagSeeder extends Seeder
 {
     public function run(): void
     {
-        $tags = ['Laravel', 'PHP', 'API', 'Vue.js', 'React', 'Database', 'CSS', 'JavaScript', 'Python', 'DevOps'];
+        $tags = [
+            'Action', 'RPG', 'FPS', 'Battle Royale', 'Open World',
+            'Strategy', 'Simulation', 'Horror', 'Multiplayer', 'Single Player',
+            'Indie', 'AAA', 'MMO', 'MOBA', 'Fighting',
+        ];
 
         foreach ($tags as $name) {
             Tag::create([

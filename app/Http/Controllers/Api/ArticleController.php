@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Traits\ApiResponseTrait;
@@ -30,11 +31,12 @@ class ArticleController extends Controller
         }
 
         if ($request->filled('author')) {
-            $query->whereHas('user', fn ($q) => $q->where('name', 'like', "%{$request->author}%"));
+            $author = str_replace(['%', '_'], ['\\%', '\\_'], $request->author);
+            $query->whereHas('user', fn ($q) => $q->where('name', 'like', "%{$author}%"));
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('content', 'like', "%{$search}%");
@@ -69,16 +71,20 @@ class ArticleController extends Controller
 
     public function store(StoreArticleRequest $request): JsonResponse
     {
+        if (! $request->hasFile('thumbnail')) {
+            return $this->error('Thumbnail wajib diisi', 422);
+        }
+
         $data = $request->validated();
         $data['slug'] = Str::slug($data['title']).'-'.Str::random(5);
         $data['user_id'] = $request->user()->id;
 
         if ($data['status'] === 'published') {
-            $data['published_at'] = now();
+            $data['status'] = 'pending';
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+            $data['thumbnail'] = ImageHelper::uploadAndConvertToWebp($request->file('thumbnail'));
         }
 
         $article = Article::create($data);
@@ -89,7 +95,7 @@ class ArticleController extends Controller
 
         $article->load(['category', 'user', 'tags']);
 
-        return $this->success($article, 'Artikel berhasil dibuat', 201);
+        return $this->success($article, 'Artikel berhasil dibuat dan menunggu persetujuan admin', 201);
     }
 
     public function update(StoreArticleRequest $request, string $id): JsonResponse
@@ -102,7 +108,11 @@ class ArticleController extends Controller
 
         $data = $request->validated();
 
-        if ($data['status'] === 'published' && $article->status !== 'published') {
+        if ($data['status'] === 'published') {
+            $data['status'] = 'pending';
+        }
+
+        if ($data['status'] === 'pending' && $article->status !== 'pending' && $article->status !== 'published') {
             $data['published_at'] = now();
         }
 
@@ -110,7 +120,7 @@ class ArticleController extends Controller
             if ($article->thumbnail) {
                 Storage::disk('public')->delete($article->thumbnail);
             }
-            $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+            $data['thumbnail'] = ImageHelper::uploadAndConvertToWebp($request->file('thumbnail'));
         }
 
         $article->update($data);
@@ -150,10 +160,10 @@ class ArticleController extends Controller
         }
 
         $article->update([
-            'status' => 'published',
+            'status' => 'pending',
             'published_at' => now(),
         ]);
 
-        return $this->success($article, 'Artikel berhasil dipublikasikan');
+        return $this->success($article, 'Artikel berhasil dikirim untuk persetujuan admin');
     }
 }

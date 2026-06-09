@@ -15,7 +15,7 @@ class StoreCommentRequest extends FormRequest
     {
         return [
             'article_id' => 'required|exists:articles,id',
-            'content' => 'required|string|min:3',
+            'content' => 'required|string|min:3|max:2000',
         ];
     }
 }

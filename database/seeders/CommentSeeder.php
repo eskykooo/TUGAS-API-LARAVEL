@@ -12,21 +12,27 @@ class CommentSeeder extends Seeder
     public function run(): void
     {
         $comments = [
-            ['title_like' => '%Laravel%', 'content' => 'Artikel yang sangat membantu! Saya baru saja bermigrasi dari Laravel 10 dan penjelasan soal perubahan struktur folder-nya sangat jelas.'],
-            ['title_like' => '%Laravel%', 'content' => 'Terima kasih sudah berbagi. Fitur SQLite sebagai default memang mengejutkan tapi masuk akal untuk keperluan development.'],
-            ['title_like' => '%Laravel%', 'content' => 'Satu hal yang belum dibahas: bagaimana dengan performa di production? Apakah ada benchmark yang membandingkan Laravel 11 vs 10?'],
-            ['title_like' => '%API%', 'content' => 'Panduan paling lengkap yang pernah saya baca soal Sanctum. Langsung saya coba dan berhasil dalam 30 menit!'],
-            ['title_like' => '%API%', 'content' => 'Ada yang bisa bantu? Saya dapat error 401 padahal token sudah benar. Ternyata lupa tambahkan Accept: application/json di header. Semoga membantu yang lain.'],
-            ['title_like' => '%Timnas%', 'content' => 'Bangga banget jadi orang Indonesia hari ini! Semoga anak-anak muda ini terus konsisten dan tidak cepat puas.'],
-            ['title_like' => '%Timnas%', 'content' => 'Yang paling saya kagumi adalah mentalitas tim. Tidak ada yang sok bintang, semua kerja keras sama-sama.'],
-            ['title_like' => '%Timnas%', 'content' => 'Semoga ini jadi titik balik sepak bola Indonesia. Sudah lama kita menunggu momen seperti ini.'],
-            ['title_like' => '%Pemilu%', 'content' => 'Pemilu memang melelahkan tapi ini bukti bahwa demokrasi kita berjalan. Partisipasi pemilih yang tinggi patut diapresiasi.'],
-            ['title_like' => '%Pemilu%', 'content' => 'Semoga pemimpin terpilih bisa membawa perubahan nyata. Rakyat sudah menunggu aksi nyata, bukan janji manis.'],
-            ['title_like' => '%Film%', 'content' => 'Senang sekali melihat film Indonesia go international. Dulu kita cuma bisa bangga lihat film tetangga, sekarang giliran kita!'],
-            ['title_like' => '%Film%', 'content' => 'Setuju banget dengan poin tentang kekuatan cerita lokal. Film seperti ini yang membuat kita makin cinta Indonesia.'],
-            ['title_like' => '%AI%', 'content' => 'AI memang membantu, tapi kita juga harus hati-hati. Jangan sampai ketergantungan malah bikin kita lupa berpikir kritis.'],
-            ['title_like' => '%Startup%', 'content' => 'Era bakar uang sudah berakhir. Sekarang zamannya startup yang benar-benar memberikan nilai tambah.'],
-            ['title_like' => '%Bulu%', 'content' => 'Bulu tangkis adalah identitas bangsa. Semoga PBSI terus berbenah dan menghasilkan atlet-atlet juara dunia.'],
+            ['title_like' => '%RTX 5090%', 'content' => 'Harganya bikin kantong bolong tapi performanya gila banget. Mimin, kapan ada review buat yang budget 10 jutaan?'],
+            ['title_like' => '%RTX 5090%', 'content' => 'DLSS 4 kedengarannya revolusioner. Tapi apa benar bisa 2x lipat frame rate tanpa turun kualitas?'],
+            ['title_like' => '%PlayStation 6%', 'content' => 'PS5 aja belum punya, udah ngomongin PS6 aja. Tapi seru juga lihat bocoran spesifikasinya.'],
+            ['title_like' => '%PlayStation 6%', 'content' => 'Semoga backward compatibility-nya benar-benar seamless. Koleksi game PS5 gue jangan sia-sia.'],
+            ['title_like' => '%Nintendo Switch 2%', 'content' => 'Akhirnya! Joy-con anti drift adalah fitur terbaik menurut gue. Nintendo dengerin keluhan pengguna juga.'],
+            ['title_like' => '%Nintendo Switch 2%', 'content' => 'Zelda Tears of the Kingdom Director Cut? Langsung pre-order gue. Semoga harganya masuk akal di Indonesia.'],
+            ['title_like' => '%Mobile Legends%', 'content' => 'Lunox kelihatannya OP banget. Pasti bakal kena nerf dalam 2 minggu ke depan.'],
+            ['title_like' => '%Mobile Legends%', 'content' => 'Akhirnya Zilong di-rework. Udah lama banget hero ini jadi meme di ranked.'],
+            ['title_like' => '%Genshin%', 'content' => 'Natlan keren banget! Tapi mending nabung primogem dulu buat Mavuika.'],
+            ['title_like' => '%Genshin%', 'content' => 'Artifact farming yang lebih ramah? Akhirnya Hoyo dengerin keluhan pemain!'],
+            ['title_like' => '%EVO 2026%', 'content' => 'Gue nonton live dan nangis pas GarudaFist menang. Bangga jadi orang Indonesia!'],
+            ['title_like' => '%EVO 2026%', 'content' => 'Ini baru prestasi. Semoga pemerintah sadar bahwa esports butuh dukungan serius.'],
+            ['title_like' => '%ONIC%', 'content' => 'Grand final 7 game yang luar biasa. ONIC pantas juara, tapi RRQ juga main bagus.'],
+            ['title_like' => '%ONIC%', 'content' => 'Kairi MVP ternyata. Performa Lunox-nya bikin merinding.'],
+            ['title_like' => '%Elden Ring%', 'content' => 'Shadow of the Erdtree benar-benar masterpiece. 100 jam lebih gue habisin untuk explore semua area.'],
+            ['title_like' => '%Elden Ring%', 'content' => 'Boss Messmer the Impaler adalah boss terbaik yang pernah gue lawan. Desain dan moveset-nya brilliant.'],
+            ['title_like' => '%Hollow Knight%', 'content' => 'Silksong akhirnya rilis dan gue udah 50 jam main. Worth the wait banget!'],
+            ['title_like' => '%Hollow Knight%', 'content' => 'Soundtrack-nya bikin merinding. Christopher Larkin emang jenius.'],
+            ['title_like' => '%Valorant%', 'content' => 'Guide yang bagus banget. Tips aim training-nya gue terapin dan rank naik dari Gold ke Platinum dalam 2 minggu.'],
+            ['title_like' => '%Free Fire%', 'content' => 'Akhirnya ada guide FF yang proper. Selama ini susah cari konten ranked FF yang bener.'],
+            ['title_like' => '%Free Fire%', 'content' => 'Tips rotasi di late game itu paling berguna. Gue sering kena third party gara-gara keburu push.'],
         ];
 
         $users = User::where('role', '!=', 'admin')->get();
@@ -36,20 +42,19 @@ class CommentSeeder extends Seeder
             foreach ($articles as $article) {
                 Comment::create([
                     'article_id' => $article->id,
-                    'user_id'    => $users->random()->id,
-                    'content'    => $item['content'],
-                    'status'     => 'approved',
+                    'user_id' => $users->random()->id,
+                    'content' => $item['content'],
+                    'status' => 'approved',
                 ]);
             }
         }
 
-        // Tambah komentar random untuk artikel tanpa komentar
         $articlesWithout = Article::whereDoesntHave('comments')->get();
         foreach ($articlesWithout as $article) {
             Comment::factory(rand(2, 3))->create([
                 'article_id' => $article->id,
-                'user_id'    => $users->random()->id,
-                'status'     => 'approved',
+                'user_id' => $users->random()->id,
+                'status' => 'approved',
             ]);
         }
     }

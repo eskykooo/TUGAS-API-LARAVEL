@@ -68,4 +68,9 @@ class Article extends Model
 
         return Storage::url($this->thumbnail);
     }
+
+    public function getSafeContentAttribute(): string
+    {
+        return \App\Helpers\HtmlSanitizer::sanitize($this->content);
+    }
 }

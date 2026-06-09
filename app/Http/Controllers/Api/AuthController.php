@@ -17,8 +17,12 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): JsonResponse
     {
+        if ($request->filled('website')) {
+            return $this->error('Bad request', 400);
+        }
+
         $user = User::create([
-            'name' => $request->name,
+            'name' => strip_tags($request->name),
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'author',
@@ -34,6 +38,10 @@ class AuthController extends Controller
 
     public function login(Request $request): JsonResponse
     {
+        if ($request->filled('website')) {
+            return $this->error('Bad request', 400);
+        }
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -41,7 +49,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Email atau password salah.'],
             ]);

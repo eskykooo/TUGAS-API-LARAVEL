@@ -1,25 +1,14 @@
 @if ($paginator->hasPages())
-    <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-between">
-        {{-- Previous Page Link --}}
-        @if ($paginator->onFirstPage())
-            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
-                {!! __('pagination.previous') !!}
-            </span>
-        @else
-            <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300">
-                {!! __('pagination.previous') !!}
-            </a>
-        @endif
-
-        {{-- Next Page Link --}}
-        @if ($paginator->hasMorePages())
-            <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300">
-                {!! __('pagination.next') !!}
-            </a>
-        @else
-            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
-                {!! __('pagination.next') !!}
-            </span>
-        @endif
-    </nav>
+<nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-between gap-3">
+    @if ($paginator->onFirstPage())
+    <span class="flex-1 px-4 py-2 bg-dark-card border-2 border-dark-border text-gray-600 cursor-not-allowed text-sm font-bold uppercase tracking-wider text-center opacity-50"><i class="fas fa-chevron-left mr-1"></i> Sebelumnya</span>
+    @else
+    <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="flex-1 px-4 py-2 bg-dark-card border-2 border-dark-border hover:border-brutal-orange hover:text-brutal-orange transition text-sm font-bold uppercase tracking-wider text-center"><i class="fas fa-chevron-left mr-1"></i> Sebelumnya</a>
+    @endif
+    @if ($paginator->hasMorePages())
+    <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="flex-1 px-4 py-2 bg-dark-card border-2 border-dark-border hover:border-brutal-orange hover:text-brutal-orange transition text-sm font-bold uppercase tracking-wider text-center">Selanjutnya <i class="fas fa-chevron-right ml-1"></i></a>
+    @else
+    <span class="flex-1 px-4 py-2 bg-dark-card border-2 border-dark-border text-gray-600 cursor-not-allowed text-sm font-bold uppercase tracking-wider text-center opacity-50">Selanjutnya <i class="fas fa-chevron-right ml-1"></i></span>
+    @endif
+</nav>
 @endif

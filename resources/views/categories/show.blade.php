@@ -1,26 +1,15 @@
 @extends('layouts.app')
-@section('title', $category->name . ' - BlogCMS')
+@section('title', $category->name . ' - Nexus Gaming')
 @section('meta_description', $category->description ?? 'Kategori ' . $category->name)
 
-@php
-$catColors = [
-    'teknologi' => ['bg'=>'from-blue-600 to-blue-800','text'=>'text-blue-600'],
-    'politik' => ['bg'=>'from-red-600 to-red-800','text'=>'text-red-600'],
-    'olahraga' => ['bg'=>'from-green-600 to-green-800','text'=>'text-green-600'],
-    'hiburan' => ['bg'=>'from-purple-600 to-purple-800','text'=>'text-purple-600'],
-    'bisnis' => ['bg'=>'from-yellow-600 to-yellow-800','text'=>'text-yellow-600'],
-];
-$c = $catColors[$category->slug] ?? ['bg'=>'from-slate-600 to-slate-800','text'=>'text-slate-600'];
-@endphp
-
 @section('content')
-<section class="relative bg-gradient-to-br {{ $c['bg'] }} py-16 sm:py-20">
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white" data-aos="fade-up">{{ $category->name }}</h1>
+<section class="bg-dark-card border-b-4 border-brutal-orange py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="font-orbitron text-2xl sm:text-3xl lg:text-4xl font-black text-white uppercase tracking-wide" data-aos="fade-up">{{ $category->name }}</h1>
         @if($category->description)
-        <p class="text-white/80 mt-2 sm:mt-3 max-w-2xl mx-auto text-sm sm:text-base" data-aos="fade-up" data-aos-delay="100">{{ $category->description }}</p>
+        <p class="text-gray-400 mt-2 sm:mt-3 max-w-2xl mx-auto text-sm sm:text-base font-bold uppercase tracking-wider" data-aos="fade-up" data-aos-delay="100">{{ $category->description }}</p>
         @endif
-        <p class="text-white/60 mt-2 text-xs sm:text-sm" data-aos="fade-up" data-aos-delay="150">{{ $articles->total() }} artikel</p>
+        <p class="text-gray-500 mt-2 text-xs sm:text-sm font-bold uppercase tracking-wider" data-aos="fade-up" data-aos-delay="150">{{ $articles->total() }} artikel</p>
     </div>
 </section>
 
@@ -41,19 +30,19 @@ $c = $catColors[$category->slug] ?? ['bg'=>'from-slate-600 to-slate-800','text'=
                 </div>
                 @else
                 <div class="text-center py-16 sm:py-20">
-                    <i class="fas fa-folder-open text-4xl sm:text-5xl text-slate-300 dark:text-slate-600 mb-4"></i>
-                    <p class="text-slate-500 dark:text-slate-400">Belum ada artikel di kategori ini.</p>
+                    <i class="fas fa-folder-open text-4xl sm:text-5xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-500 font-bold uppercase tracking-wider">Belum ada artikel di kategori ini.</p>
                 </div>
                 @endif
             </div>
             <aside class="space-y-6">
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 dark:border-slate-700 sticky top-24">
-                    <h4 class="font-bold text-slate-800 dark:text-white mb-3 sm:mb-4">Kategori Lainnya</h4>
+                <div class="glass-card p-4 sm:p-5 sticky top-24">
+                    <h4 class="font-orbitron font-bold text-white mb-3 sm:mb-4 uppercase tracking-wider text-sm">Kategori Lainnya</h4>
                     <div class="space-y-1 sm:space-y-2">
                         @foreach($categories as $cat)
-                        <a href="/categories/{{ $cat->slug }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition text-sm {{ $cat->id === $category->id ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 font-semibold' : 'text-slate-600 dark:text-slate-300' }}">
+                        <a href="/categories/{{ $cat->slug }}" class="flex items-center justify-between px-3 py-2.5 border-2 border-transparent hover:border-brutal-orange transition text-sm {{ $cat->id === $category->id ? 'bg-brutal-orange text-brutal-black font-bold' : 'text-gray-400 hover:text-white font-bold' }} uppercase tracking-wider">
                             <span>{{ $cat->name }}</span>
-                            <span class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">{{ $cat->articles_count }}</span>
+                            <span class="text-xs bg-dark-bg px-2 py-0.5 ml-2 flex-shrink-0 border border-dark-border">{{ $cat->articles_count }}</span>
                         </a>
                         @endforeach
                     </div>

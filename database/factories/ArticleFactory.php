@@ -10,9 +10,10 @@ class ArticleFactory extends Factory
     public function definition(): array
     {
         $title = fake()->unique()->sentence(6);
+
         return [
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . Str::random(5),
+            'slug' => Str::slug($title).'-'.Str::random(5),
             'content' => fake()->paragraphs(10, true),
             'excerpt' => fake()->paragraph(2),
             'thumbnail' => null,

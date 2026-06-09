@@ -19,19 +19,20 @@ class SearchController extends Controller
         $articles = Article::published()->with(['category', 'user', 'tags']);
 
         if ($query) {
-            $articles->where(function ($q) use ($query) {
-                $q->where('title', 'like', "%{$query}%")
-                  ->orWhere('content', 'like', "%{$query}%")
-                  ->orWhere('excerpt', 'like', "%{$query}%");
+            $safe = str_replace(['%', '_'], ['\\%', '\\_'], $query);
+            $articles->where(function ($q) use ($safe) {
+                $q->where('title', 'like', "%{$safe}%")
+                    ->orWhere('content', 'like', "%{$safe}%")
+                    ->orWhere('excerpt', 'like', "%{$safe}%");
             });
         }
 
         if ($categorySlug) {
-            $articles->whereHas('category', fn($q) => $q->where('slug', $categorySlug));
+            $articles->whereHas('category', fn ($q) => $q->where('slug', $categorySlug));
         }
 
         if ($tagSlug) {
-            $articles->whereHas('tags', fn($q) => $q->where('slug', $tagSlug));
+            $articles->whereHas('tags', fn ($q) => $q->where('slug', $tagSlug));
         }
 
         $articles = $articles->latest('published_at')->paginate(10);

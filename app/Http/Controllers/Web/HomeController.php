@@ -11,10 +11,11 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $featured = Article::with(['category', 'user'])
+        $slides = Article::with(['category', 'user'])
             ->where('status', 'published')
-            ->orderByDesc('views')
-            ->first();
+            ->latest('published_at')
+            ->take(5)
+            ->get();
 
         $latest = Article::with(['category', 'user'])
             ->where('status', 'published')
@@ -27,7 +28,7 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        $categories = Category::withCount(['articles' => fn($q) => $q->where('status', 'published')])->get();
+        $categories = Category::withCount(['articles' => fn ($q) => $q->where('status', 'published')])->get();
 
         $popular = Article::with(['category'])
             ->where('status', 'published')
@@ -38,7 +39,7 @@ class HomeController extends Controller
         $tags = Tag::withCount('articles')->orderByDesc('articles_count')->take(15)->get();
 
         return view('home', compact(
-            'featured', 'latest', 'breaking',
+            'slides', 'latest', 'breaking',
             'categories', 'popular', 'tags'
         ));
     }

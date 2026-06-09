@@ -15,6 +15,10 @@ class LoginController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->filled('website')) {
+            return redirect('/');
+        }
+
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -22,6 +26,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
+
             return redirect()->intended('/dashboard')->with('success', 'Berhasil masuk. Selamat datang kembali!');
         }
 
@@ -35,6 +40,7 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/')->with('success', 'Kamu telah berhasil keluar.');
     }
 }

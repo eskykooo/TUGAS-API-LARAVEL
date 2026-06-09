@@ -15,7 +15,7 @@ return new class extends Migration
             $table->longText('content');
             $table->text('excerpt')->nullable();
             $table->string('thumbnail')->nullable();
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->enum('status', ['draft', 'published', 'archived', 'pending'])->default('draft');
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->integer('views')->default(0);

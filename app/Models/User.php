@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -42,5 +43,14 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function avatarUrl(int $size = 80): string
+    {
+        if ($this->avatar) {
+            return Storage::url($this->avatar);
+        }
+
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name ?? '').'&background=FF6B35&color=000&size='.$size;
     }
 }

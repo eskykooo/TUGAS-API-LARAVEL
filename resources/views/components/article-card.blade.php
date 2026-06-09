@@ -1,16 +1,16 @@
 @php
 $catColors = [
-    'teknologi' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    'politik'   => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-    'olahraga'  => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-    'hiburan'   => 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-    'bisnis'    => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+    'pc-gaming' => 'border-brutal-orange text-brutal-orange',
+    'console' => 'border-brutal-red text-brutal-red',
+    'mobile' => 'border-brutal-yellow text-brutal-yellow',
+    'esports' => 'border-brutal-green text-brutal-green',
+    'gaming-news' => 'border-brutal-orange text-brutal-orange',
 ];
 $slug = $article->category->slug ?? 'default';
-$color = $catColors[$slug] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+$color = $catColors[$slug] ?? 'border-gray-500 text-gray-400';
 @endphp
 
-<article class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group flex flex-col border border-slate-100 dark:border-slate-700">
+<article class="glass-card overflow-hidden flex flex-col group border-2 border-dark-border hover:border-brutal-orange">
     <div class="overflow-hidden h-48 relative flex-shrink-0">
         @if($article->thumbnail_url)
         <img src="{{ $article->thumbnail_url }}"
@@ -18,25 +18,25 @@ $color = $catColors[$slug] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dar
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
              loading="lazy">
         @else
-        <div class="w-full h-full bg-gradient-to-br from-sky-500/30 to-indigo-600/30 flex items-center justify-center">
-            <i class="fas fa-newspaper text-4xl text-slate-300 dark:text-slate-600"></i>
+        <div class="w-full h-full bg-dark-card flex items-center justify-center">
+            <i class="fas fa-gamepad text-4xl text-gray-600"></i>
         </div>
         @endif
-        <span class="absolute top-3 left-3 px-2.5 py-1 {{ $color }} text-xs font-semibold rounded-lg backdrop-blur-sm">
+        <span class="absolute top-3 left-3 tag-brutal {{ $color }} border-2">
             {{ $article->category->name ?? 'Umum' }}
         </span>
     </div>
     <div class="p-5 flex flex-col flex-1">
-        <h3 class="font-bold text-slate-800 dark:text-white mb-2 line-clamp-2 leading-snug group-hover:text-sky-500 transition-colors text-base md:text-lg">
+        <h3 class="font-orbitron font-bold text-white mb-2 line-clamp-2 leading-snug group-hover:text-brutal-orange transition-colors text-base md:text-lg uppercase tracking-wide">
             <a href="/articles/{{ $article->slug }}">{{ $article->title }}</a>
         </h3>
-        <p class="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-4 flex-1 leading-relaxed">{{ $article->excerpt }}</p>
-        <div class="flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-slate-700 mt-auto">
-            <img src="https://ui-avatars.com/api/?name={{ urlencode($article->user->name ?? 'A') }}&background=0ea5e9&color=fff&size=32"
+        <p class="text-gray-400 text-sm line-clamp-2 mb-4 flex-1 leading-relaxed font-bold uppercase tracking-wider">{{ $article->excerpt }}</p>
+        <div class="flex items-center gap-2 pt-4 border-t-2 border-dark-border mt-auto">
+            <img src="{{ $article->user->avatarUrl(32) }}"
                  alt="{{ $article->user->name ?? '' }}"
-                 class="w-7 h-7 rounded-full flex-shrink-0">
-            <span class="text-xs text-slate-500 truncate min-w-0">{{ $article->user->name ?? '-' }}</span>
-            <span class="text-xs text-slate-400 flex items-center gap-1 ml-auto flex-shrink-0"><i class="fas fa-eye mr-0.5"></i>{{ number_format($article->views) }}</span>
+                 class="w-7 h-7 rounded border-2 border-brutal-orange flex-shrink-0">
+            <span class="text-xs text-gray-500 font-bold uppercase tracking-wider truncate min-w-0">{{ $article->user->name ?? '-' }}</span>
+            <span class="text-xs text-gray-500 flex items-center gap-1 ml-auto flex-shrink-0 font-bold uppercase tracking-wider"><i class="fas fa-eye mr-0.5"></i>{{ number_format($article->views) }}</span>
         </div>
     </div>
 </article>
