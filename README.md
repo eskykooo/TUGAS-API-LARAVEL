@@ -5,13 +5,15 @@
 ![Sanctum](https://img.shields.io/badge/Sanctum-Auth-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-# RIZQY - 2409116039 - A'2024
+# RIZQY - 2409116039 - A'2024 - Universitas Mulawarman
 
 # 🎮 PROJEK UAS - WEBSITE BERITA GAMING (NEXUS GAMING)
 
 **Nexus Gaming** adalah portal berita gaming Indonesia yang dibangun sebagai projek UAS. Website ini menyajikan berita dan artikel seputar dunia gaming — mulai dari PC gaming, console, mobile, esports, hingga review dan panduan.
 
 Dikembangkan menggunakan **Laravel 10** dengan **REST API** dan **Web UI** (dual-interface), otentikasi **Sanctum**, serta desain dark mode khas gaming.
+
+🔗 **Website:** [https://nexusgaming.page.gd/](https://nexusgaming.page.gd/)
 
 ---
 
@@ -23,8 +25,6 @@ Dikembangkan menggunakan **Laravel 10** dengan **REST API** dan **Web UI** (dual
 - [Instalasi & Menjalankan Projek](#-instalasi--menjalankan-projek)
 - [Akun Demo](#-akun-demo)
 - [Route Web (Frontend)](#-route-web-frontend)
-- [Route API](#-route-api)
-- [Penjelasan API](#-penjelasan-api)
 - [Relasi Database](#-relasi-database)
 - [Screenshot Halaman](#-screenshot-halaman)
 
@@ -246,211 +246,6 @@ Semua password: **`password`**
 
 ---
 
-## 📡 Route API
-
-Semua response API menggunakan format JSON seragam:
-```json
-{
-    "success": true/false,
-    "message": "...",
-    "data": ...,
-    "meta": { ... }
-}
-```
-
-### Public API
-
-| Method | Endpoint | Fungsi |
-|--------|----------|--------|
-| `POST` | `/api/auth/register` | Register user baru |
-| `POST` | `/api/auth/login` | Login, return token |
-| `GET` | `/api/articles` | Daftar artikel (dengan filter) |
-| `GET` | `/api/articles/{slug}` | Detail artikel |
-| `GET` | `/api/articles/{id}/comments` | Komentar per artikel |
-| `GET` | `/api/categories` | Semua kategori |
-| `GET` | `/api/categories/{slug}/articles` | Artikel per kategori |
-| `GET` | `/api/tags` | Semua tag |
-| `GET` | `/api/tags/{slug}/articles` | Artikel per tag |
-
-### Protected API (Bearer Token)
-
-| Method | Endpoint | Fungsi |
-|--------|----------|--------|
-| `POST` | `/api/auth/logout` | Logout |
-| `GET` | `/api/auth/me` | Data user saat ini |
-| `POST` | `/api/articles` | Buat artikel baru |
-| `PUT` | `/api/articles/{id}` | Update artikel |
-| `DELETE` | `/api/articles/{id}` | Hapus artikel |
-| `POST` | `/api/articles/{id}/publish` | Publikasikan artikel |
-| `POST` | `/api/comments` | Tambah komentar |
-| `PUT` | `/api/comments/{id}` | Update komentar |
-| `DELETE` | `/api/comments/{id}` | Hapus komentar |
-
-### Admin API
-
-| Method | Endpoint | Fungsi |
-|--------|----------|--------|
-| `GET` | `/api/admin/comments` | Semua komentar |
-| `PUT` | `/api/admin/comments/{id}/approve` | Approve komentar |
-
----
-
-## 📖 Penjelasan API
-
-### 1. Autentikasi
-
-#### Register
-
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-    "name": "Budi Santoso",
-    "email": "budi@example.com",
-    "password": "password",
-    "password_confirmation": "password"
-}
-```
-
-**Response:**
-```json
-{
-    "success": true,
-    "message": "Registrasi berhasil",
-    "data": {
-        "user": { "id": 8, "name": "Budi Santoso", "email": "budi@example.com", "role": "author" },
-        "token": "1|abc123..."
-    }
-}
-```
-
-#### Login
-
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-    "email": "admin@blog.com",
-    "password": "password"
-}
-```
-
-**Response:**
-```json
-{
-    "success": true,
-    "message": "Login berhasil",
-    "data": {
-        "user": { "id": 1, "name": "Admin", "email": "admin@blog.com", "role": "admin" },
-        "token": "1|abc123..."
-    }
-}
-```
-
-**Catatan:** Pesan error login bersifat umum (`"Email atau kata sandi salah"`) untuk mencegah email enumeration.
-
-### 2. Artikel
-
-#### GET Daftar Artikel (dengan filter)
-
-```http
-GET /api/articles?category=pc-gaming&tag=valorant&author=Budi&search=game&page=1
-```
-
-**Response:**
-```json
-{
-    "success": true,
-    "message": "Data artikel berhasil diambil",
-    "data": [
-        {
-            "id": 1,
-            "title": "Judul Artikel",
-            "slug": "judul-artikel-abc12",
-            "excerpt": "Cuplikan artikel...",
-            "status": "published",
-            "views": 150,
-            "published_at": "2026-06-10T08:00:00.000000Z",
-            "category": { "id": 1, "name": "PC Gaming", "slug": "pc-gaming" },
-            "user": { "id": 2, "name": "Penulis" },
-            "tags": [ { "id": 1, "name": "valorant", "slug": "valorant" } ],
-            "comments_count": 3
-        }
-    ],
-    "meta": {
-        "current_page": 1,
-        "total": 10,
-        "per_page": 10,
-        "last_page": 1
-    }
-}
-```
-
-#### GET Detail Artikel
-
-```http
-GET /api/articles/{slug}
-```
-
-**Response:** Detail artikel lengkap dengan komentar (status approved) dan data user.
-
-#### POST Buat Artikel (Authenticated)
-
-```http
-POST /api/articles
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-    "title": "Review Elden Ring: Game of The Year",
-    "content": "<p>Elden Ring adalah...</p>",
-    "excerpt": "Review lengkap Elden Ring.",
-    "category_id": 1,
-    "status": "published",
-    "tags": [1, 3, 5]
-}
-```
-
-### 3. Komentar
-
-#### POST Tambah Komentar
-
-```http
-POST /api/comments
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-    "article_id": 1,
-    "content": "Artikelnya bagus!",
-    "parent_id": null
-}
-```
-
-Untuk membalas komentar, isi `parent_id` dengan ID komentar yang ingin dibalas.
-
-#### GET Komentar per Artikel
-
-```http
-GET /api/articles/1/comments
-```
-
-### 4. Filter Pencarian
-
-Parameter query yang tersedia di `GET /api/articles`:
-
-| Parameter | Contoh | Fungsi |
-|-----------|--------|--------|
-| `category` | `pc-gaming` | Filter kategori (slug) |
-| `tag` | `valorant` | Filter tag (slug) |
-| `author` | `Budi` | Filter nama penulis |
-| `search` | `game` | Cari judul/konten |
-| `page` | `2` | Halaman pagination |
-
----
-
 ## 🔗 Relasi Database
 
 | Tipe Relasi | Model 1 | Model 2 | Foreign Key |
@@ -607,16 +402,7 @@ Tugas_API/
 
 ---
 
-## 📚 Sumber Belajar
 
-Projek ini dibuat berdasarkan pembelajaran:
-- **Laravel 10 Documentation** — https://laravel.com/docs/10.x
-- **Tailwind CSS Documentation** — https://tailwindcss.com/docs
-- **Alpine.js Documentation** — https://alpinejs.dev/
-- **Laravel Sanctum** — https://laravel.com/docs/10.x/sanctum
-- **Database Design & ERD** — Mata Kuliah Basis Data
-
----
 
 ## 📄 Lisensi
 
@@ -624,4 +410,4 @@ Projek ini dibuat untuk tujuan **pembelajaran dan tugas UAS**. Tidak untuk pengg
 
 ---
 
-*Dibuat oleh **RIZQY - 2409116039 - A'2024** — Sistem Informasi, Universitas X*
+*Dibuat oleh **RIZQY - 2409116039 - A'2024** — Sistem Informasi, Universitas Mulawarman*
