@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Comment;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -87,7 +88,8 @@ class DashboardController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string|max:100000',
             'excerpt' => 'nullable|string',
-            'thumbnail' => ImageHelper::VALIDATION_RULES(true),
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'thumbnail_data' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
@@ -101,7 +103,9 @@ class DashboardController extends Controller
             $data['status'] = 'pending';
         }
 
-        if ($request->hasFile('thumbnail')) {
+        if ($request->filled('thumbnail_data')) {
+            $data['thumbnail'] = $this->saveBase64Thumbnail($request->input('thumbnail_data'));
+        } elseif ($request->hasFile('thumbnail')) {
             $data['thumbnail'] = ImageHelper::uploadAndConvertToWebp($request->file('thumbnail'));
         }
 
@@ -143,7 +147,8 @@ class DashboardController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string|max:100000',
             'excerpt' => 'nullable|string',
-            'thumbnail' => ImageHelper::VALIDATION_RULES(),
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'thumbnail_data' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
@@ -158,7 +163,12 @@ class DashboardController extends Controller
             $data['published_at'] = now();
         }
 
-        if ($request->hasFile('thumbnail')) {
+        if ($request->filled('thumbnail_data')) {
+            if ($article->thumbnail) {
+                Storage::disk('public')->delete($article->thumbnail);
+            }
+            $data['thumbnail'] = $this->saveBase64Thumbnail($request->input('thumbnail_data'));
+        } elseif ($request->hasFile('thumbnail')) {
             if ($article->thumbnail) {
                 Storage::disk('public')->delete($article->thumbnail);
             }
@@ -259,5 +269,29 @@ class DashboardController extends Controller
         $comment->toggleReaction($reaction, auth()->id());
 
         return back();
+    }
+
+    private function saveBase64Thumbnail(string $data): string
+    {
+        if (! preg_match('/^data:image\/(\w+);base64,/', $data, $matches)) {
+            throw new Exception('Format gambar tidak valid.');
+        }
+
+        $imageData = base64_decode(substr($data, strpos($data, ',') + 1));
+        $filename = 'thumbnails/'.Str::random(40).'.webp';
+        $image = \imagecreatefromstring($imageData);
+
+        if (! $image) {
+            throw new Exception('Gagal memproses gambar.');
+        }
+
+        $tempPath = sys_get_temp_dir().'/'.Str::random(40).'.webp';
+        \imagewebp($image, $tempPath, 80);
+        \imagedestroy($image);
+
+        Storage::disk('public')->put($filename, file_get_contents($tempPath));
+        unlink($tempPath);
+
+        return $filename;
     }
 }

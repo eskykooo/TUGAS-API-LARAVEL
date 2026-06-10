@@ -3,6 +3,7 @@
 @section('meta_description', 'Tulis artikel gaming berkualitas.')
 
 @push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <style>
 .editor-height trix-editor {
     min-height: 480px !important;
@@ -86,6 +87,10 @@ trix-editor:focus {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
+.cropper-view-box { border-radius: 0; outline-color: #FF6B35; }
+.cropper-point { background-color: #FF6B35; }
+.cropper-line { background-color: #FF6B35; }
+.cropper-modal { background: rgba(0,0,0,0.75); }
 </style>
 @endpush
 
@@ -214,15 +219,16 @@ trix-editor:focus {
                             <i class="fas fa-image text-brutal-orange text-xs"></i>
                             <span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Thumbnail</span>
                         </div>
+                        <input type="hidden" name="thumbnail_data" x-model="thumbnailData">
                         <div class="border-2 border-dashed border-dark-border hover:border-brutal-orange/60 transition-colors p-4 text-center cursor-pointer rounded relative group thumbnail-drop-zone"
                              x-data="{ dragging: false }"
                              @dragover.prevent="dragging = true"
                              @dragleave.prevent="dragging = false"
-                             @drop.prevent="handleDrop($event); dragging = false"
+                             @drop.prevent="openCropper($event.dataTransfer.files[0]); dragging = false"
                              @click="document.getElementById('thumbnail-input').click()"
                              :class="dragging ? 'border-brutal-orange bg-brutal-orange/5' : ''">
                             <input type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp" class="hidden" id="thumbnail-input"
-                                   @change="previewThumbnail($event)">
+                                   @change="openCropper($event.target.files[0])">
                             <template x-if="!thumbnailPreview">
                                 <div>
                                     <div class="w-10 h-10 mx-auto mb-2 bg-dark-bg border-2 border-dark-border rounded flex items-center justify-center group-hover:border-brutal-orange group-hover:text-brutal-orange transition-colors">
@@ -235,7 +241,7 @@ trix-editor:focus {
                             <template x-if="thumbnailPreview">
                                 <div class="relative">
                                     <img :src="thumbnailPreview" class="w-full h-40 object-cover border border-dark-border rounded">
-                                    <button type="button" @click.stop="thumbnailPreview = null; document.getElementById('thumbnail-input').value = ''"
+                                    <button type="button" @click.stop="thumbnailPreview = null; thumbnailData = ''; document.getElementById('thumbnail-input').value = ''"
                                             class="absolute top-2 right-2 w-7 h-7 bg-brutal-red text-white text-xs flex items-center justify-center hover:bg-white hover:text-brutal-red transition-colors rounded border border-brutal-black shadow-brutal">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -245,20 +251,58 @@ trix-editor:focus {
                         @error('thumbnail')<p class="text-brutal-red text-xs font-bold mt-1.5">{{ $message }}</p>@enderror
                     </div>
 
-                    <div class="glass-panel border border-brutal-orange/20 hover:border-brutal-orange/40 transition-colors p-5 rounded">
+                    <div x-show="cropperOpen" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                         class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+                         @click.away="closeCropper()">
+                        <div class="bg-dark-card border-2 border-brutal-orange rounded max-w-2xl w-full">
+                            <div class="flex items-center justify-between px-5 py-3 border-b border-dark-border">
+                                <span class="text-sm font-bold text-white uppercase tracking-wider">Crop Thumbnail</span>
+                                <button type="button" @click="closeCropper()" class="text-gray-500 hover:text-white transition-colors">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="p-5">
+                                <img id="cropImage" class="max-w-full">
+                            </div>
+                            <div class="flex items-center justify-between px-5 py-3 border-t border-dark-border bg-dark-bg">
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="cropper.zoom(0.1)" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                        <i class="fas fa-search-plus mr-1"></i> Zoom In
+                                    </button>
+                                    <button type="button" @click="cropper.zoom(-0.1)" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                        <i class="fas fa-search-minus mr-1"></i> Zoom Out
+                                    </button>
+                                    <button type="button" @click="cropper.rotate(-90)" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                        <i class="fas fa-undo mr-1"></i> Rotate
+                                    </button>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="closeCropper()" class="px-4 py-1.5 bg-dark-bg border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                        Batal
+                                    </button>
+                                    <button type="button" @click="applyCrop()" class="px-4 py-1.5 bg-brutal-orange text-brutal-black text-xs font-black border border-brutal-black rounded hover:shadow-brutal transition-all">
+                                        <i class="fas fa-check mr-1"></i> Simpan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel border border-brutal-orange/20 hover:border-brutal-orange/40 transition-colors p-5 rounded"
+                         x-data="{ catOpen: false, selected: '{{ old('category_id') }}', selectedName: '' }"
+                         :class="catOpen && 'z-30 relative'">
                         <div class="flex items-center gap-2 mb-3">
                             <i class="fas fa-folder text-brutal-orange text-xs"></i>
                             <span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Kategori</span>
                         </div>
-                        <div class="relative" x-data="{ open: false, selected: '{{ old('category_id') }}', selectedName: '' }"
-                             @keydown.escape="open = false">
-                            <button type="button" @click="open = !open"
+                        <div class="relative" @keydown.escape="catOpen = false">
+                            <button type="button" @click="catOpen = !catOpen"
                                     class="w-full bg-dark-bg border-2 border-dark-border focus:border-brutal-orange px-4 py-3 text-sm text-left font-bold flex items-center justify-between transition-colors outline-none rounded">
                                 <span x-text="selectedName || 'Pilih kategori'" :class="!selectedName ? 'text-gray-500' : 'text-white'"></span>
-                                <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform" :class="open && 'rotate-180'"></i>
+                                <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform" :class="catOpen && 'rotate-180'"></i>
                             </button>
                             <input type="hidden" name="category_id" :value="selected">
-                            <div x-show="open" x-cloak @click.away="open = false"
+                            <div x-show="catOpen" x-cloak @click.away="catOpen = false"
                                  class="absolute top-full left-0 right-0 mt-1.5 bg-dark-bg border-2 border-brutal-orange z-20 max-h-52 overflow-y-auto rounded">
                                 @foreach($categories as $cat)
                                 @php
@@ -459,6 +503,7 @@ trix-editor:focus {
 @endsection
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
 const ALL_TAGS = @json($tags);
 
@@ -472,7 +517,49 @@ function articleForm() {
         tagSearch: '',
         selectedTags: [],
         thumbnailPreview: null,
+        thumbnailData: '',
+        cropperOpen: false,
+        cropper: null,
         excerpt: @json(old('excerpt', '')),
+
+        openCropper(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            if (file.size > 5 * 1024 * 1024) { alert('Maksimal 5MB'); return; }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.cropperOpen = true;
+                this.$nextTick(() => {
+                    const img = document.getElementById('cropImage');
+                    img.src = e.target.result;
+                    if (this.cropper) this.cropper.destroy();
+                    this.cropper = new Cropper(img, {
+                        aspectRatio: 16 / 9,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        background: false,
+                        autoCropArea: 1,
+                        responsive: true,
+                    });
+                });
+            };
+            reader.readAsDataURL(file);
+        },
+
+        closeCropper() {
+            this.cropperOpen = false;
+            if (this.cropper) { this.cropper.destroy(); this.cropper = null; }
+            document.getElementById('thumbnail-input').value = '';
+        },
+
+        applyCrop() {
+            if (!this.cropper) return;
+            const canvas = this.cropper.getCroppedCanvas({ width: 1200, height: 675 });
+            this.thumbnailData = canvas.toDataURL('image/webp', 0.8);
+            this.thumbnailPreview = canvas.toDataURL('image/webp', 0.8);
+            this.cropperOpen = false;
+            this.cropper.destroy();
+            this.cropper = null;
+        },
 
         get wordCount() {
             const text = this.content || '';
@@ -518,27 +605,6 @@ function articleForm() {
                 .replace(/\s+/g, '-')
                 .replace(/-+/g, '-')
                 .replace(/^-|-$/g, '');
-        },
-
-        previewThumbnail(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            if (!file.type.startsWith('image/')) return;
-            const reader = new FileReader();
-            reader.onload = (e) => { this.thumbnailPreview = e.target.result; };
-            reader.readAsDataURL(file);
-        },
-
-        handleDrop(event) {
-            const file = event.dataTransfer.files[0];
-            if (!file || !file.type.startsWith('image/')) return;
-            const input = document.getElementById('thumbnail-input');
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            input.files = dt.files;
-            const reader = new FileReader();
-            reader.onload = (e) => { this.thumbnailPreview = e.target.result; };
-            reader.readAsDataURL(file);
         },
 
         onContentChange() {
@@ -667,6 +733,7 @@ function articleForm() {
             this.excerpt = '';
             this.selectedTags = [];
             this.thumbnailPreview = null;
+            this.thumbnailData = '';
             this.showPreview = false;
             document.getElementById('content').value = '';
             const trix = this.$refs.trix;
