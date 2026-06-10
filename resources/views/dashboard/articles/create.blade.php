@@ -261,8 +261,8 @@ trix-editor:focus {
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <div class="p-5">
-                                <img id="cropImage" class="max-w-full">
+                            <div class="p-5 overflow-hidden relative" style="min-height:350px;max-height:60vh;">
+                                <img id="cropImage" class="max-w-full max-h-full" style="display:block;">
                             </div>
                             <div class="flex items-center justify-between px-5 py-3 border-t border-dark-border bg-dark-bg">
                                 <div class="flex items-center gap-2">
