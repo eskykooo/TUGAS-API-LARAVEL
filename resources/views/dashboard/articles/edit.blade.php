@@ -225,11 +225,11 @@ trix-editor:focus {
                              x-data="{ dragging: false }"
                              @dragover.prevent="dragging = true"
                              @dragleave.prevent="dragging = false"
-                             @drop.prevent="openCropper($event.dataTransfer.files[0]); dragging = false"
+                             @drop.prevent="openThumbnailCropper($event.dataTransfer.files[0]); dragging = false"
                              @click="document.getElementById('thumbnail-input').click()"
                              :class="dragging ? 'border-brutal-orange bg-brutal-orange/5' : ''">
                             <input type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp" class="hidden" id="thumbnail-input"
-                                   @change="openCropper($event.target.files[0])">
+                                   @change="openThumbnailCropper($event.target.files[0])">
                             <template x-if="!thumbnailPreview">
                                 <div>
                                     <div class="w-10 h-10 mx-auto mb-2 bg-dark-bg border-2 border-dark-border rounded flex items-center justify-center group-hover:border-brutal-orange group-hover:text-brutal-orange transition-colors">
@@ -252,36 +252,34 @@ trix-editor:focus {
                         @error('thumbnail')<p class="text-brutal-red text-xs font-bold mt-1.5">{{ $message }}</p>@enderror
                     </div>
 
-                    <div x-show="cropperOpen" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                         class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
-                         @click.away="closeCropper()">
+                    <div id="cropperModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 hidden">
                         <div class="bg-dark-card border-2 border-brutal-orange rounded max-w-2xl w-full">
                             <div class="flex items-center justify-between px-5 py-3 border-b border-dark-border">
                                 <span class="text-sm font-bold text-white uppercase tracking-wider">Crop Thumbnail</span>
-                                <button type="button" @click="closeCropper()" class="text-gray-500 hover:text-white transition-colors">
+                                <button type="button" id="closeCropperBtn" class="text-gray-500 hover:text-white transition-colors">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <div class="p-5 overflow-hidden relative" style="min-height:350px;max-height:60vh;">
-                                <img id="cropImage" class="max-w-full max-h-full" style="display:block;">
+                            <div class="bg-black overflow-hidden m-5" style="max-height:60vh;">
+                                <img id="cropImage" class="max-w-full">
                             </div>
                             <div class="flex items-center justify-between px-5 py-3 border-t border-dark-border bg-dark-bg">
                                 <div class="flex items-center gap-2">
-                                    <button type="button" @click="cropper.zoom(0.1)" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                    <button type="button" id="zoomInBtn" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
                                         <i class="fas fa-search-plus mr-1"></i> Zoom In
                                     </button>
-                                    <button type="button" @click="cropper.zoom(-0.1)" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                    <button type="button" id="zoomOutBtn" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
                                         <i class="fas fa-search-minus mr-1"></i> Zoom Out
                                     </button>
-                                    <button type="button" @click="cropper.rotate(-90)" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                    <button type="button" id="rotateBtn" class="px-3 py-1.5 bg-dark-card border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
                                         <i class="fas fa-undo mr-1"></i> Rotate
                                     </button>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <button type="button" @click="closeCropper()" class="px-4 py-1.5 bg-dark-bg border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
+                                    <button type="button" id="cancelCropBtn" class="px-4 py-1.5 bg-dark-bg border border-dark-border text-gray-400 hover:text-white text-xs font-bold rounded transition-colors">
                                         Batal
                                     </button>
-                                    <button type="button" @click="applyCrop()" class="px-4 py-1.5 bg-brutal-orange text-brutal-black text-xs font-black border border-brutal-black rounded hover:shadow-brutal transition-all">
+                                    <button type="button" id="applyCropBtn" class="px-4 py-1.5 bg-brutal-orange text-brutal-black text-xs font-black border border-brutal-black rounded hover:shadow-brutal transition-all">
                                         <i class="fas fa-check mr-1"></i> Simpan
                                     </button>
                                 </div>
@@ -520,6 +518,70 @@ trix-editor:focus {
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
+let thumbnailCropper = null;
+
+function openThumbnailCropper(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Maksimal 5MB'); return; }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const img = document.getElementById('cropImage');
+        const modal = document.getElementById('cropperModal');
+        img.src = e.target.result;
+
+        img.onload = function () {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            if (thumbnailCropper) thumbnailCropper.destroy();
+            thumbnailCropper = new Cropper(img, {
+                aspectRatio: 16 / 9,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 1,
+                cropBoxResizable: true,
+                cropBoxMovable: true,
+                rotatable: true,
+                zoomable: true,
+                zoomOnTouch: true,
+                zoomOnWheel: true,
+            });
+        };
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('thumbnail-input').value = '';
+}
+
+function closeThumbnailCropper() {
+    const modal = document.getElementById('cropperModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    if (thumbnailCropper) { thumbnailCropper.destroy(); thumbnailCropper = null; }
+}
+
+function applyThumbnailCrop() {
+    if (!thumbnailCropper) return;
+    const canvas = thumbnailCropper.getCroppedCanvas({ width: 1200, height: 675 });
+    const dataUrl = canvas.toDataURL('image/webp', 0.8);
+    const alpineForm = document.querySelector('[x-data="articleForm()"]');
+    if (alpineForm) {
+        const formData = Alpine.$data(alpineForm);
+        formData.thumbnailData = dataUrl;
+        formData.thumbnailPreview = dataUrl;
+    }
+    closeThumbnailCropper();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('closeCropperBtn')?.addEventListener('click', closeThumbnailCropper);
+    document.getElementById('cancelCropBtn')?.addEventListener('click', closeThumbnailCropper);
+    document.getElementById('applyCropBtn')?.addEventListener('click', applyThumbnailCrop);
+    document.getElementById('zoomInBtn')?.addEventListener('click', () => thumbnailCropper?.zoom(0.1));
+    document.getElementById('zoomOutBtn')?.addEventListener('click', () => thumbnailCropper?.zoom(-0.1));
+    document.getElementById('rotateBtn')?.addEventListener('click', () => thumbnailCropper?.rotate(-90));
+});
+</script>
+<script>
 const ALL_TAGS = @json($tags);
 const ARTICLE_TAG_IDS = @json($article->tags->pluck('id'));
 
@@ -533,51 +595,7 @@ function articleForm() {
         selectedTags: [],
         thumbnailPreview: null,
         thumbnailData: '',
-        cropperOpen: false,
-        cropper: null,
         excerpt: @json(old('excerpt', $article->excerpt ?? '')),
-
-        openCropper(file) {
-            if (!file || !file.type.startsWith('image/')) return;
-            if (file.size > 5 * 1024 * 1024) { alert('Maksimal 5MB'); return; }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.cropperOpen = true;
-                this.$nextTick(() => {
-                    const img = document.getElementById('cropImage');
-                    img.src = e.target.result;
-                    if (this.cropper) this.cropper.destroy();
-                    this.cropper = new Cropper(img, {
-                        aspectRatio: 16 / 9,
-                        viewMode: 2,
-                        dragMode: 'move',
-                        background: false,
-                        autoCropArea: 1,
-                        responsive: true,
-                        highlight: true,
-                        minContainerWidth: 200,
-                        minContainerHeight: 120,
-                    });
-                });
-            };
-            reader.readAsDataURL(file);
-        },
-
-        closeCropper() {
-            this.cropperOpen = false;
-            if (this.cropper) { this.cropper.destroy(); this.cropper = null; }
-            document.getElementById('thumbnail-input').value = '';
-        },
-
-        applyCrop() {
-            if (!this.cropper) return;
-            const canvas = this.cropper.getCroppedCanvas({ width: 1200, height: 675 });
-            this.thumbnailData = canvas.toDataURL('image/webp', 0.8);
-            this.thumbnailPreview = canvas.toDataURL('image/webp', 0.8);
-            this.cropperOpen = false;
-            this.cropper.destroy();
-            this.cropper = null;
-        },
 
         init() {
             this.selectedTags = ALL_TAGS.filter(t => ARTICLE_TAG_IDS.includes(t.id));
