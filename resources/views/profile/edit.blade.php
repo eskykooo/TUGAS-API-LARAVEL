@@ -63,6 +63,12 @@
                     @error('email')<p class="text-brutal-red text-sm mt-1 font-bold">{{ $message }}</p>@enderror
                 </div>
 
+                <div>
+                    <label class="block text-sm font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Bio / Tentang</label>
+                    <textarea name="bio" rows="3" class="input-brutal resize-none @error('bio') border-brutal-red @enderror" placeholder="Tulis biodata singkat kamu...">{{ old('bio', auth()->user()->bio) }}</textarea>
+                    @error('bio')<p class="text-brutal-red text-sm mt-1 font-bold">{{ $message }}</p>@enderror
+                </div>
+
                 <div class="flex gap-3 pt-2 justify-end">
                     <a href="/dashboard" class="btn-ghost text-sm hover:border-brutal-red hover:text-brutal-red">Batal</a>
                     <button type="submit" class="btn-primary text-sm">Simpan Perubahan</button>

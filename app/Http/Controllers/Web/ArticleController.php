@@ -10,12 +10,18 @@ class ArticleController extends Controller
     public function show($slug)
     {
         $article = Article::where('slug', $slug)
-            ->with(['category', 'user', 'tags', 'comments' => function ($q) {
-                $q->where('status', 'approved')->with('user');
-            }])
+            ->with(['category', 'user', 'tags'])
             ->firstOrFail();
 
         $article->increment('views');
+
+        $totalComments = $article->comments()->approved()->count();
+
+        $article->load(['comments' => function ($q) {
+            $q->with(['user', 'replies' => function ($r) {
+                $r->with('user');
+            }])->approved()->root()->latest();
+        }]);
 
         $related = Article::published()
             ->where('category_id', $article->category_id)
@@ -23,6 +29,6 @@ class ArticleController extends Controller
             ->with(['category', 'user'])
             ->latest('published_at')->take(3)->get();
 
-        return view('articles.show', compact('article', 'related'));
+        return view('articles.show', compact('article', 'related', 'totalComments'));
     }
 }

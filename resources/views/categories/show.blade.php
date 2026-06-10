@@ -42,7 +42,7 @@
                         @foreach($categories as $cat)
                         <a href="/categories/{{ $cat->slug }}" class="flex items-center justify-between px-3 py-2.5 border-2 border-transparent hover:border-brutal-orange transition text-sm {{ $cat->id === $category->id ? 'bg-brutal-orange text-brutal-black font-bold' : 'text-gray-400 hover:text-white font-bold' }} uppercase tracking-wider">
                             <span>{{ $cat->name }}</span>
-                            <span class="text-xs bg-dark-bg px-2 py-0.5 ml-2 flex-shrink-0 border border-dark-border">{{ $cat->articles_count }}</span>
+                            <span class="text-xs bg-dark-bg px-2 py-0.5 ml-2 flex-shrink-0 border border-dark-border {{ $cat->id === $category->id ? 'text-brutal-black' : 'text-gray-400' }}">{{ $cat->articles_count }}</span>
                         </a>
                         @endforeach
                     </div>

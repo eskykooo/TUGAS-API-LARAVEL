@@ -16,7 +16,6 @@ class CommentController extends Controller
     public function index(string $articleId): JsonResponse
     {
         $comments = Comment::where('article_id', $articleId)
-            ->where('status', 'approved')
             ->with('user')
             ->latest()
             ->get();
@@ -44,12 +43,12 @@ class CommentController extends Controller
         }
 
         $data['user_id'] = $request->user()->id;
-        $data['status'] = 'pending';
+        $data['status'] = 'approved';
 
         $comment = Comment::create($data);
         $comment->load('user');
 
-        return $this->success($comment, 'Komentar berhasil ditambahkan (menunggu approve)', 201);
+        return $this->success($comment, 'Komentar berhasil ditambahkan', 201);
     }
 
     public function update(Request $request, string $id): JsonResponse
@@ -64,7 +63,6 @@ class CommentController extends Controller
 
         $comment->update([
             'content' => strip_tags($request->content),
-            'status' => 'pending',
         ]);
 
         return $this->success($comment, 'Komentar berhasil diperbarui');

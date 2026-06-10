@@ -15,11 +15,11 @@ class CategorySeeder extends Seeder
             ['name' => 'Mobile', 'slug' => 'mobile', 'description' => 'Game mobile terpopuler dan tips trik bermain di perangkat seluler'],
             ['name' => 'E-Sports', 'slug' => 'esports', 'description' => 'Turnamen, tim, dan berita kompetisi esports nasional dan internasional'],
             ['name' => 'Reviews', 'slug' => 'reviews', 'description' => 'Review mendalam game-game terbaru dari berbagai platform'],
-            ['name' => 'Guides', 'slug' => 'guides', 'description' => 'Panduan,攻略, dan tips bermain game untuk pemula hingga pro'],
+            ['name' => 'Guides', 'slug' => 'guides', 'description' => 'Panduan dan tips bermain game untuk pemula hingga pro'],
         ];
 
         foreach ($categories as $data) {
-            Category::create($data);
+            Category::updateOrCreate(['slug' => $data['slug']], $data);
         }
     }
 }

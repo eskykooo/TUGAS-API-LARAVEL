@@ -6,7 +6,7 @@
 <section class="min-h-screen bg-dark-bg py-16 sm:py-20">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-3 mb-8">
-            <a href="/profile" class="p-2 bg-dark-card border-2 border-dark-border hover:border-brutal-orange transition flex-shrink-0"><i class="fas fa-arrow-left text-gray-500"></i></a>
+            <a href="/dashboard" class="p-2 bg-dark-card border-2 border-dark-border hover:border-brutal-orange transition flex-shrink-0"><i class="fas fa-arrow-left text-gray-500"></i></a>
             <div>
                 <h1 class="font-orbitron text-2xl sm:text-3xl font-black text-white uppercase tracking-wide">Keamanan</h1>
                 <p class="text-gray-500 text-sm mt-1 font-bold uppercase tracking-wider">Perbarui password akun kamu</p>
@@ -38,7 +38,7 @@
                     <input type="password" name="password_confirmation" class="input-brutal" placeholder="Ulangi password baru" required autocomplete="new-password">
                 </div>
                 <div class="flex gap-3 pt-2">
-                    <a href="/profile" class="btn-ghost text-sm hover:border-brutal-orange hover:text-brutal-orange">Kembali ke Profil</a>
+                    <a href="/dashboard" class="btn-ghost text-sm hover:border-brutal-orange hover:text-brutal-orange">Kembali ke Dasbor</a>
                     <button type="submit" class="btn-primary text-sm">Simpan Password</button>
                 </div>
             </form>

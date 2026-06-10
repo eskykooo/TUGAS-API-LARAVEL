@@ -24,6 +24,7 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'avatar' => 'nullable|string',
+            'bio' => 'nullable|string|max:500',
         ]);
 
         if ($request->filled('avatar')) {

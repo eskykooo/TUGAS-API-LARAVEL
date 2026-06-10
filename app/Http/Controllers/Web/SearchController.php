@@ -15,6 +15,7 @@ class SearchController extends Controller
         $query = $request->get('q');
         $categorySlug = $request->get('category');
         $tagSlug = $request->get('tag');
+        $sort = $request->get('sort', 'latest');
 
         $articles = Article::published()->with(['category', 'user', 'tags']);
 
@@ -35,11 +36,26 @@ class SearchController extends Controller
             $articles->whereHas('tags', fn ($q) => $q->where('slug', $tagSlug));
         }
 
-        $articles = $articles->latest('published_at')->paginate(10);
+        match ($sort) {
+            'popular' => $articles->orderByDesc('views'),
+            'trending' => $articles->orderByDesc('views')->latest('published_at'),
+            default => $articles->latest('published_at'),
+        };
+
+        $articles = $articles->paginate(12)->withQueryString();
 
         $categories = Category::withCount('articles')->get();
         $tags = Tag::withCount('articles')->get();
 
-        return view('search', compact('articles', 'query', 'categories', 'tags', 'categorySlug', 'tagSlug'));
+        $trendingArticles = Article::published()
+            ->with(['category', 'user'])
+            ->orderByDesc('views')
+            ->take(4)
+            ->get();
+
+        return view('search', compact(
+            'articles', 'query', 'categories', 'tags',
+            'categorySlug', 'tagSlug', 'sort', 'trendingArticles'
+        ));
     }
 }

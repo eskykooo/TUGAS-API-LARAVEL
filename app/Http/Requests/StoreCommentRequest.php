@@ -16,6 +16,7 @@ class StoreCommentRequest extends FormRequest
         return [
             'article_id' => 'required|exists:articles,id',
             'content' => 'required|string|min:3|max:2000',
+            'parent_id' => 'nullable|exists:comments,id',
         ];
     }
 }

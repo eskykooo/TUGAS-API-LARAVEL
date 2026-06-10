@@ -22,10 +22,26 @@ class DashboardController extends Controller
 
         $search = $request->get('search');
 
-        $totalArticles = Article::where('user_id', $user->id)->count();
+        $userArticleIds = Article::where('user_id', $user->id)->pluck('id');
+
+        $totalArticles = $userArticleIds->count();
         $totalViews = Article::where('user_id', $user->id)->sum('views');
-        $totalComments = Comment::whereIn('article_id', Article::where('user_id', $user->id)->pluck('id'))->count();
+        $totalComments = Comment::whereIn('article_id', $userArticleIds)->count();
         $draftCount = Article::where('user_id', $user->id)->where('status', 'draft')->count();
+        $pendingCount = Article::where('user_id', $user->id)->where('status', 'pending')->count();
+
+        $recentComments = Comment::whereIn('article_id', $userArticleIds)
+            ->with(['user', 'article'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $popularArticles = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->with('category')
+            ->orderByDesc('views')
+            ->take(5)
+            ->get();
 
         $articles = Article::where('user_id', $user->id)
             ->with(['category', 'tags']);
@@ -39,10 +55,13 @@ class DashboardController extends Controller
             });
         }
 
-        $articles = $articles->latest()->paginate(10);
+        $articles = $articles->latest()->paginate(8);
 
         return view('dashboard.index', compact(
-            'totalArticles', 'totalViews', 'totalComments', 'draftCount', 'articles', 'search'
+            'totalArticles', 'totalViews', 'totalComments',
+            'draftCount', 'pendingCount',
+            'recentComments', 'popularArticles',
+            'articles', 'search'
         ));
     }
 
@@ -196,7 +215,15 @@ class DashboardController extends Controller
         $data = $request->validate([
             'article_id' => 'required|exists:articles,id',
             'content' => 'required|string|min:3|max:2000',
+            'parent_id' => 'nullable|exists:comments,id',
         ]);
+
+        if ($data['parent_id'] ?? false) {
+            $parent = Comment::find($data['parent_id']);
+            if (! $parent || $parent->article_id != $data['article_id']) {
+                return back()->with('error', 'Komentar induk tidak valid.');
+            }
+        }
 
         $duplicate = Comment::where('user_id', auth()->id())
             ->where('content', $data['content'])
@@ -212,9 +239,25 @@ class DashboardController extends Controller
             'article_id' => $data['article_id'],
             'user_id' => auth()->id(),
             'content' => strip_tags($data['content']),
-            'status' => 'pending',
+            'status' => 'approved',
+            'parent_id' => $data['parent_id'] ?? null,
         ]);
 
-        return back()->with('success', 'Komentar berhasil dikirim dan sedang menunggu moderasi.');
+        return back()->with('success', 'Komentar berhasil ditambahkan.');
+    }
+
+    public function toggleReaction(Request $request, $id)
+    {
+        $comment = Comment::findOrFail($id);
+        $reaction = $request->input('reaction', 'like');
+
+        $allowed = ['like', 'love', 'laugh', 'wow', 'sad', 'angry'];
+        if (! in_array($reaction, $allowed)) {
+            return back()->with('error', 'Reaksi tidak valid.');
+        }
+
+        $comment->toggleReaction($reaction, auth()->id());
+
+        return back();
     }
 }

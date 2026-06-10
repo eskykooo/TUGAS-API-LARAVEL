@@ -17,10 +17,14 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
+        $slideIds = $slides->pluck('id')->toArray();
+
         $latest = Article::with(['category', 'user'])
             ->where('status', 'published')
+            ->whereNotIn('id', $slideIds)
             ->latest('published_at')
-            ->paginate(9);
+            ->take(6)
+            ->get();
 
         $breaking = Article::with(['category', 'user'])
             ->where('status', 'published')
@@ -33,14 +37,28 @@ class HomeController extends Controller
         $popular = Article::with(['category'])
             ->where('status', 'published')
             ->orderByDesc('views')
-            ->take(5)
+            ->take(8)
+            ->get();
+
+        $trending = Article::with(['category', 'user'])
+            ->where('status', 'published')
+            ->whereNotIn('id', $slideIds)
+            ->orderByDesc('views')
+            ->take(4)
             ->get();
 
         $tags = Tag::withCount('articles')->orderByDesc('articles_count')->take(15)->get();
 
+        $footerArticles = Article::with(['category', 'user'])
+            ->where('status', 'published')
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+
         return view('home', compact(
             'slides', 'latest', 'breaking',
-            'categories', 'popular', 'tags'
+            'categories', 'popular', 'trending',
+            'tags', 'footerArticles'
         ));
     }
 }
