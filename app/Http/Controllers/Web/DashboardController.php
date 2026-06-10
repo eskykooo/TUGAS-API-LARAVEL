@@ -285,12 +285,12 @@ class DashboardController extends Controller
             throw new Exception('Gagal memproses gambar.');
         }
 
-        $tempPath = sys_get_temp_dir().'/'.Str::random(40).'.webp';
-        \imagewebp($image, $tempPath, 80);
+        ob_start();
+        \imagewebp($image, null, 80);
+        $webpData = ob_get_clean();
         \imagedestroy($image);
 
-        Storage::disk('public')->put($filename, file_get_contents($tempPath));
-        unlink($tempPath);
+        Storage::disk('public')->put($filename, $webpData);
 
         return $filename;
     }

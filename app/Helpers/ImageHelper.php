@@ -27,12 +27,12 @@ class ImageHelper
 
         $image = \imagecreatefromstring(\file_get_contents($file->getRealPath()));
 
-        $tempPath = \sys_get_temp_dir().'/'.$filename;
-        \imagewebp($image, $tempPath, 80);
+        \ob_start();
+        \imagewebp($image, null, 80);
+        $webpData = \ob_get_clean();
         \imagedestroy($image);
 
-        Storage::disk('public')->put($fullPath, file_get_contents($tempPath));
-        unlink($tempPath);
+        Storage::disk('public')->put($fullPath, $webpData);
 
         return $fullPath;
     }
