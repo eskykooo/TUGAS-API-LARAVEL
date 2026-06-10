@@ -544,6 +544,7 @@ function openThumbnailCropper(file) {
         };
     };
     reader.readAsDataURL(file);
+    document.getElementById('thumbnail-input').value = '';
 }
 
 function closeThumbnailCropper() {
