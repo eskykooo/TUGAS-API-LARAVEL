@@ -549,11 +549,12 @@ function articleForm() {
                     if (this.cropper) this.cropper.destroy();
                     this.cropper = new Cropper(img, {
                         aspectRatio: 16 / 9,
-                        viewMode: 1,
+                        viewMode: 0,
                         dragMode: 'move',
                         background: false,
                         autoCropArea: 1,
                         responsive: true,
+                        highlight: true,
                     });
                 });
             };
