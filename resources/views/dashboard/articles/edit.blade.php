@@ -212,9 +212,9 @@ trix-editor:focus {
                             <i class="fas fa-image text-brutal-orange text-xs"></i>
                             <span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Thumbnail</span>
                         </div>
-                        <input type="hidden" name="thumbnail_data" x-model="thumbnailData">
+                        <input type="hidden" name="thumbnail_data" id="thumbnailDataInput">
                         @if($article->thumbnail_url)
-                        <div class="mb-3 relative group" x-show="!thumbnailPreview">
+                        <div class="mb-3 relative group" id="currentThumbWrap">
                             <img src="{{ $article->thumbnail_url }}" class="w-full h-36 object-cover border border-dark-border rounded">
                             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
                                 <span class="text-xs font-bold text-white uppercase tracking-wider">Thumbnail saat ini</span>
@@ -230,24 +230,20 @@ trix-editor:focus {
                              :class="dragging ? 'border-brutal-orange bg-brutal-orange/5' : ''">
                             <input type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp" class="hidden" id="thumbnail-input"
                                    @change="openThumbnailCropper($event.target.files[0])">
-                            <template x-if="!thumbnailPreview">
-                                <div>
-                                    <div class="w-10 h-10 mx-auto mb-2 bg-dark-bg border-2 border-dark-border rounded flex items-center justify-center group-hover:border-brutal-orange group-hover:text-brutal-orange transition-colors">
-                                        <i class="fas fa-cloud-upload-alt text-lg text-gray-500 group-hover:text-brutal-orange transition-colors"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">{{ $article->thumbnail_url ? 'Klik untuk ganti' : 'Klik atau seret gambar' }}</p>
-                                    <p class="text-[10px] text-gray-600 font-bold mt-1">PNG, JPG, WebP &bull; Maks 5MB</p>
+                            <div id="thumbPlaceholder">
+                                <div class="w-10 h-10 mx-auto mb-2 bg-dark-bg border-2 border-dark-border rounded flex items-center justify-center group-hover:border-brutal-orange group-hover:text-brutal-orange transition-colors">
+                                    <i class="fas fa-cloud-upload-alt text-lg text-gray-500 group-hover:text-brutal-orange transition-colors"></i>
                                 </div>
-                            </template>
-                            <template x-if="thumbnailPreview">
-                                <div class="relative">
-                                    <img :src="thumbnailPreview" class="w-full h-40 object-cover border border-dark-border rounded">
-                                    <button type="button" @click.stop="thumbnailPreview = null; thumbnailData = ''; document.getElementById('thumbnail-input').value = ''"
-                                            class="absolute top-2 right-2 w-7 h-7 bg-brutal-red text-white text-xs flex items-center justify-center hover:bg-white hover:text-brutal-red transition-colors rounded border border-brutal-black shadow-brutal">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </template>
+                                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">{{ $article->thumbnail_url ? 'Klik untuk ganti' : 'Klik atau seret gambar' }}</p>
+                                <p class="text-[10px] text-gray-600 font-bold mt-1">PNG, JPG, WebP &bull; Maks 5MB</p>
+                            </div>
+                            <div id="thumbPreview" class="relative hidden">
+                                <img id="thumbPreviewImg" class="w-full h-40 object-cover border border-dark-border rounded">
+                                <button type="button" id="thumbRemoveBtn"
+                                        class="absolute top-2 right-2 w-7 h-7 bg-brutal-red text-white text-xs flex items-center justify-center hover:bg-white hover:text-brutal-red transition-colors rounded border border-brutal-black shadow-brutal">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                         </div>
                         @error('thumbnail')<p class="text-brutal-red text-xs font-bold mt-1.5">{{ $message }}</p>@enderror
                     </div>
@@ -520,6 +516,24 @@ trix-editor:focus {
 <script>
 let thumbnailCropper = null;
 
+function showThumbPreview(dataUrl) {
+    document.getElementById('thumbPlaceholder').classList.add('hidden');
+    document.getElementById('thumbPreview').classList.remove('hidden');
+    document.getElementById('thumbPreviewImg').src = dataUrl;
+    const wrap = document.getElementById('currentThumbWrap');
+    if (wrap) wrap.classList.add('hidden');
+}
+
+function hideThumbPreview() {
+    document.getElementById('thumbPlaceholder').classList.remove('hidden');
+    document.getElementById('thumbPreview').classList.add('hidden');
+    document.getElementById('thumbPreviewImg').src = '';
+    document.getElementById('thumbnailDataInput').value = '';
+    document.getElementById('thumbnail-input').value = '';
+    const wrap = document.getElementById('currentThumbWrap');
+    if (wrap) wrap.classList.remove('hidden');
+}
+
 function openThumbnailCropper(file) {
     if (!file || !file.type.startsWith('image/')) return;
     if (file.size > 5 * 1024 * 1024) { alert('Maksimal 5MB'); return; }
@@ -549,7 +563,6 @@ function openThumbnailCropper(file) {
         };
     };
     reader.readAsDataURL(file);
-    document.getElementById('thumbnail-input').value = '';
 }
 
 function closeThumbnailCropper() {
@@ -563,12 +576,8 @@ function applyThumbnailCrop() {
     if (!thumbnailCropper) return;
     const canvas = thumbnailCropper.getCroppedCanvas({ width: 1200, height: 675 });
     const dataUrl = canvas.toDataURL('image/webp', 0.8);
-    const alpineForm = document.querySelector('[x-data="articleForm()"]');
-    if (alpineForm) {
-        const formData = Alpine.$data(alpineForm);
-        formData.thumbnailData = dataUrl;
-        formData.thumbnailPreview = dataUrl;
-    }
+    document.getElementById('thumbnailDataInput').value = dataUrl;
+    showThumbPreview(dataUrl);
     closeThumbnailCropper();
 }
 
@@ -579,6 +588,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('zoomInBtn')?.addEventListener('click', () => thumbnailCropper?.zoom(0.1));
     document.getElementById('zoomOutBtn')?.addEventListener('click', () => thumbnailCropper?.zoom(-0.1));
     document.getElementById('rotateBtn')?.addEventListener('click', () => thumbnailCropper?.rotate(-90));
+    document.getElementById('thumbRemoveBtn')?.addEventListener('click', hideThumbPreview);
 });
 </script>
 <script>
@@ -593,8 +603,6 @@ function articleForm() {
         showPreview: false,
         tagSearch: '',
         selectedTags: [],
-        thumbnailPreview: null,
-        thumbnailData: '',
         excerpt: @json(old('excerpt', $article->excerpt ?? '')),
 
         init() {
@@ -742,7 +750,7 @@ function articleForm() {
             if (this.wordCount >= 300) score += 10;
             if (this.selectedTags.length > 0) score += 5;
             if (this.selectedTags.length >= 2) score += 5;
-            if (this.thumbnailPreview) score += 10;
+            if (document.getElementById('thumbnailDataInput')?.value) score += 10;
             return Math.min(100, Math.round(score));
         },
 
