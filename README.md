@@ -143,7 +143,7 @@ Dikembangkan menggunakan **Laravel 10** dengan **REST API** dan **Web UI** (dual
 
 ```bash
 # 1. Clone repositori
-git clone https://github.com/eskykooo/TUGAS-API-LARAVEL.git
+git clone https://github.com/eskykooo/TUGAS-UAS-PBW.git
 cd Tugas_API
 
 # 2. Install dependency PHP
